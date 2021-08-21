@@ -44,6 +44,7 @@ class simplekalmanfilter:
     def state_process_setter(self,X,dt,std_acc = 1,process_noise=0):
         print(X)
         if self.dim_x == 2:
+            X = np.reshape(X,(self.dim_x,1))
             self.X = X
             self.dt = dt
             self.A[0][1] = self.dt  
@@ -56,6 +57,7 @@ class simplekalmanfilter:
             self.w = self.w + process_noise
             self.H[0][0] = 1
         elif self.dim_x == 4:
+            X = np.reshape(X,(self.dim_x,1))
             self.X = X
             self.dt = dt
             self.A[0][2] = self.A[1][3] = self.dt
@@ -83,7 +85,7 @@ class simplekalmanfilter:
             raise ValueError("Incorrect Z shape")
         if z is None:
             z = self.Z
-        
+        Xm = np.reshape(Xm,(self.dim_y,1))
         self.Y = np.dot(self.C,Xm) + z
         S = np.dot(self.H,np.dot(self.P,self.H.T)) + self.R
         K = np.dot(np.dot(self.P,self.H.T),np.linalg.inv(S))

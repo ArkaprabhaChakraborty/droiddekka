@@ -35,7 +35,7 @@ def main():
     #Create KalmanFilter object KF
     #KalmanFilter(dt, u_x, u_y, std_acc, x_std_meas, y_std_meas)
     k = skf(4,2) 
-    k.state_process_setter(X=np.array([[1], [1], [0.1],[0.1]]),dt=0.15,process_noise=2.25)
+    k.state_process_setter(X=np.array([1, 1, 0.1,0.1]),dt=0.15,process_noise=2.25)
     
 
     while(True):
@@ -58,8 +58,7 @@ def main():
             frame = cv2.rectangle(frame, (int(x - 15), int(y - 15)), (int(x + 15), int(y + 15)), (255, 0, 0), 2)
             cv2.putText(frame, 'Prediction', (int(x+10), int(y-35)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 2)
             # Update
-            center = np.reshape(centers[0],(2,1))
-            (x1, y1) = k.update(center)
+            (x1, y1) = k.update(centers[0])
             print((x1,y1))
             # Draw a rectangle as the estimated object position
             frame = cv2.rectangle(frame, (int(x1 - 15), int(y1 - 15)), (int(x1 + 15), int(y1 + 15)), (0, 0, 255), 2)
