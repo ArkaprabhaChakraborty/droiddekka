@@ -26,6 +26,7 @@ class simplekalmanfilter:
         self.w = np.zeros((dim_x,1))
         self.R = np.zeros((dim_x//2,dim_x//2))
         self.dt = 0
+        self.acc = 1
 
     def __repr__(self):
         return "\n".join([
@@ -54,6 +55,7 @@ class simplekalmanfilter:
             self.Q[1][1] = (self.dt ** 2)
             self.R[0][0] = (self.dt ** 4)//4
             self.Q = self.Q * std_acc
+            self.acc = std_acc
             self.w = self.w + process_noise
             self.H[0][0] = 1
         elif self.dim_x == 4:
@@ -65,9 +67,16 @@ class simplekalmanfilter:
             self.Q[2][0] = self.Q[3][1] = self.Q[0][2] = self.Q[1][3] = (self.dt ** 3)//2
             self.Q[2][2] = self.Q[3][3] = self.dt ** 2
             self.Q = self.Q * std_acc
+            self.acc = std_acc
             self.R[0][0] = self.R[1][1] = (self.dt ** 4)//4
             self.w = self.w + process_noise
             self.H[0][0] = self.H[1][1] =1
+        #elif self.dim_x == 6:
+        #    pass
+
+
+
+
         
     def predict(self):
         self.X = np.dot(self.A,self.X) + np.dot(self.B,self.u) + self.w
@@ -94,6 +103,23 @@ class simplekalmanfilter:
         X = self.X[0:self.dim_y]
         
         return X
+
+    def low_pass_predict(self, acc = 1., alpha = 0):
+        if alpha > 1:
+            raise ValueError("alpha cannot be more than 1")
+        if alpha < 0:
+            raise ValueError("alpha cannot be negative")
+        self.X = np.dot(self.A,self.X) + np.dot(self.B,self.u) + self.w
+        if acc != self.acc:
+            P_k = np.dot(np.dot(self.A,self.P),self.A.T) + (self.Q*acc/self.acc)
+            self.P = alpha*self.P + (1-alpha)*P_k
+        else:
+            alpha = 0
+            P_k = np.dot(np.dot(self.A,self.P),self.A.T) + (self.Q)
+            self.P = alpha*self.P + (1-alpha)*P_k
+        X = self.X
+        P = self.P        
+        return (X,P)
 
 
 

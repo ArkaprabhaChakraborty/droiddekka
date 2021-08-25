@@ -2,7 +2,7 @@
 import numpy as np
 import cv2
 from droiddekka.simplekalman.kalmanfilter import simplekalmanfilter as skf
-
+import random as rand
 debugMode=1
 
 def detect(frame):
@@ -33,18 +33,14 @@ def main():
     HiSpeed = 100
 
     #Create KalmanFilter object KF
-    #KalmanFilter(dt, u_x, u_y, std_acc, x_std_meas, y_std_meas)
     k = skf(4,2) 
     k.state_process_setter(X=np.array([1, 1, 0.1,0.1]),dt=0.15,process_noise=2.25)
-    
+
 
     while(True):
         # Read frame
-        ret, frame = VideoCap.read()
-
-        # Detect object
+        ret, frame = VideoCap.read()        
         centers = detect(frame)
-
         # If centroids are detected then track them
         if (len(centers) > 0):
 
@@ -52,7 +48,7 @@ def main():
             cv2.circle(frame, (int(centers[0][0]), int(centers[0][1])), 10, (0, 191, 255), 2)
 
             # Predict
-            (X, P) = k.predict()
+            (X, P) = k.low_pass_predict(acc=rand.uniform(0,2),alpha = 0.5)
             x,y = X[0:2]
             # Draw a rectangle as the predicted object position
             frame = cv2.rectangle(frame, (int(x - 15), int(y - 15)), (int(x + 15), int(y + 15)), (255, 0, 0), 2)
