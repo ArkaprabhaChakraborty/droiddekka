@@ -5,6 +5,7 @@ from droiddekka.simplekalman.kalmanfilter import simplekalmanfilter as skf
 import random as rand
 debugMode=1
 
+
 def detect(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     img_edges = cv2.Canny(gray, 50, 190, 3)
