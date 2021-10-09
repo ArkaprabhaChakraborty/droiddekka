@@ -8,7 +8,7 @@ class simplekalmanfilter:
     def __init__(self, dim_x, dim_y):
         if dim_x <= 1:
             raise ValueError("number of state variables has to be greater than 1")
-        if dim_y <= 1:
+        if dim_y < 1:
             raise ValueError("number of measurement inputs has to be more than one")
         self.dim_x = dim_x
         self.dim_y = dim_y
@@ -49,11 +49,11 @@ class simplekalmanfilter:
             self.X = X
             self.dt = dt
             self.A[0][1] = self.dt  
-            self.Q[0][0] = (self.dt ** 4)//4
-            self.Q[0][1] = (self.dt ** 3)//2
-            self.Q[1][0] = (self.dt ** 3)//2
+            self.Q[0][0] = (self.dt ** 4)/4
+            self.Q[0][1] = (self.dt ** 3)/2
+            self.Q[1][0] = (self.dt ** 3)/2
             self.Q[1][1] = (self.dt ** 2)
-            self.R[0][0] = (self.dt ** 4)//4
+            self.R[0][0] = (self.dt ** 4)/4
             self.Q = self.Q * std_acc
             self.acc = std_acc
             self.w = self.w + process_noise
@@ -68,7 +68,7 @@ class simplekalmanfilter:
             self.Q[2][2] = self.Q[3][3] = self.dt ** 2
             self.Q = self.Q * std_acc
             self.acc = std_acc
-            self.R[0][0] = self.R[1][1] = (self.dt ** 4)//4
+            self.R[0][0] = self.R[1][1] = (self.dt ** 4)/4
             self.w = self.w + process_noise
             self.H[0][0] = self.H[1][1] =1
         #elif self.dim_x == 6:
@@ -87,7 +87,9 @@ class simplekalmanfilter:
 
     def update(self,Xm = None,z=None):
         if Xm is not None and np.array(Xm).shape!= self.Y.shape:
-            raise ValueError("Incorrect Z shape")
+            print(Xm.shape)
+            print(self.Y.shape)
+            raise ValueError("Incorrect Y shape")
         if Xm is None:
             Xm = self.Y
         if z is not None and np.array(z).shape!= self.Z.shape:
@@ -97,10 +99,13 @@ class simplekalmanfilter:
         Xm = np.reshape(Xm,(self.dim_y,1))
         self.Y = np.dot(self.C,Xm) + z
         S = np.dot(self.H,np.dot(self.P,self.H.T)) + self.R
-        K = np.dot(np.dot(self.P,self.H.T),np.linalg.inv(S))
+        try:
+            K = np.dot(np.dot(self.P,self.H.T),np.linalg.inv(S))
+        except:
+            K = np.dot(np.dot(self.P,self.H.T),np.linalg.cholesky(S))
         self.X = self.X + np.dot(K,(self.Y - np.dot(self.H,self.X)))
         self.P = np.dot(np.eye(self.dim_x) - np.dot(K,self.H),self.P)
-        X = self.X[0:self.dim_y]
+        X = self.X
         
         return X
 
