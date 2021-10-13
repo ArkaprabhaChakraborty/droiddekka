@@ -42,7 +42,7 @@ class simplekalmanfilter:
 
             ])
     
-    def state_process_setter(self,X,dt,std_acc = 1,process_noise=0):
+    def state_process_setter(self,X,dt,transition_vector = 1,process_noise=0):
         print(X)
         if self.dim_x == 2:
             X = np.reshape(X,(self.dim_x,1))
@@ -54,8 +54,8 @@ class simplekalmanfilter:
             self.Q[1][0] = (self.dt ** 3)/2
             self.Q[1][1] = (self.dt ** 2)
             self.R[0][0] = (self.dt ** 4)/4
-            self.Q = self.Q * std_acc
-            self.acc = std_acc
+            self.Q = self.Q * transition_vector
+            self.acc = transition_vector
             self.w = self.w + process_noise
             self.H[0][0] = 1
         elif self.dim_x == 4:
@@ -66,8 +66,8 @@ class simplekalmanfilter:
             self.Q[0][0] = self.Q[1][1] = (self.dt ** 4)//4
             self.Q[2][0] = self.Q[3][1] = self.Q[0][2] = self.Q[1][3] = (self.dt ** 3)//2
             self.Q[2][2] = self.Q[3][3] = self.dt ** 2
-            self.Q = self.Q * std_acc
-            self.acc = std_acc
+            self.Q = self.Q * transition_vector
+            self.acc = transition_vector
             self.R[0][0] = self.R[1][1] = (self.dt ** 4)/4
             self.w = self.w + process_noise
             self.H[0][0] = self.H[1][1] =1
