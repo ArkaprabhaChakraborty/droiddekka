@@ -39,11 +39,9 @@ class simplekalmanfilter:
             (f"transformation matrix: \n {self.H}"),
             (f"Measurement matrix: \n {self.Y}"),
             (f"Measurement noise covariance matrix: \n {self.R}"),
-
             ])
     
     def state_process_setter(self,X,dt,transition_vector = 1,process_noise=0):
-        print(X)
         if self.dim_x == 2:
             X = np.reshape(X,(self.dim_x,1))
             self.X = X
@@ -71,12 +69,19 @@ class simplekalmanfilter:
             self.R[0][0] = self.R[1][1] = (self.dt ** 4)/4
             self.w = self.w + process_noise
             self.H[0][0] = self.H[1][1] =1
-        #elif self.dim_x == 6:
-        #    pass
-
-
-
-
+        elif self.dim_x == 6:
+            X = np.reshape(X,(self.dim_x,1))
+            self.X = X
+            self.dt = dt
+            self.A[0][3] = self.A[1][4] = self.A[2][5] = self.dt
+            self.Q[0][0] = self.Q[1][1] = self.Q[2][2] = (self.dt ** 4)//4
+            self.Q[3][0] = self.Q[4][1] = self.Q[5][2] = self.Q[0][3] = self.Q[1][4] = self.Q[2][5] = (self.dt ** 3)//2
+            self.Q[3][3] = self.Q[4][4] = self.Q[5][5] =self.dt ** 2
+            self.Q = self.Q * transition_vector
+            self.acc = transition_vector
+            self.R[0][0] = self.R[1][1] = self.R[2][2] = (self.dt ** 4)/4
+            self.w = self.w + process_noise
+            self.H[0][0] = self.H[1][1] = self.H[2][2] = 1
         
     def predict(self):
         self.X = np.dot(self.A,self.X) + np.dot(self.B,self.u) + self.w
@@ -125,9 +130,3 @@ class simplekalmanfilter:
         X = self.X
         P = self.P        
         return (X,P)
-
-
-
-
-
-
